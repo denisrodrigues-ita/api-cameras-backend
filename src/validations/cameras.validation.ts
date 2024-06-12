@@ -24,6 +24,10 @@ export const postCameraValidation = yup.object().shape({
     .required("customerId é obrigatório"),
 });
 
+export const cameraNotFound = yup.object().shape({
+  camera: yup.object().required("UUID da câmera não encontrado ou inválido"),
+});
+
 export const getCamerasByCustomerIdValidation = yup.object().shape({
   id: yup
     .string()

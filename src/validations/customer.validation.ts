@@ -7,4 +7,8 @@ export const postCustomerValidation = yup.object().shape({
     .required("Nome é obrigatório"),
 });
 
+export const customerNotFound = yup.object().shape({
+  customer: yup.object().required("UUID do cliente não encontrado ou inválido"),
+});
+
 export type CustomerPostProps = yup.InferType<typeof postCustomerValidation>;
