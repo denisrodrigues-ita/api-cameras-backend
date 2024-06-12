@@ -8,6 +8,12 @@ export const createAlertLogValidation = yup.object().shape({
     .required("cameraId é obrigatório"),
 });
 
+export const alertsNotFound = yup.object().shape({
+  alerts: yup
+    .array().min(1, "Nenhum alerta foi encontrado, tente outro período de tempo ou outro cliente")
+    .required("Nenhum alerta foi encontrado, tente outro período de tempo"),
+});
+
 export const getAlertLogByCustomer = yup.object().shape({
   id: yup
     .string()

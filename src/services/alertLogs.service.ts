@@ -4,6 +4,9 @@ import { UUID } from "crypto";
 import {
   AlertLogGetProps,
   AlertLogPostProps,
+  alertsNotFound,
+  createAlertLogValidation,
+  getAlertLogByCustomer,
 } from "../validations/alertLogs.validation";
 import {
   createAlertLog,
@@ -11,14 +14,16 @@ import {
 } from "../repositories/alertLogs.repository";
 import { parseToDateTime } from "../utils/parseToDateTime";
 import { getCustomerByUUID } from "../repositories/customers.repository";
+import { customerNotFound } from "../validations/customer.validation";
+import { cameraNotFound } from "../validations/cameras.validation";
 
 export const postAlertLogService = async (data: AlertLogPostProps) => {
   try {
+    await createAlertLogValidation.validate(data);
+
     const camera = await getCameraByUUID(data.cameraId as UUID);
 
-    if (!camera) {
-      throw new Error("CAMERA_NOT_FOUND");
-    }
+    await cameraNotFound.validate({ camera });
 
     const result = await createAlertLog(data);
 
@@ -30,15 +35,15 @@ export const postAlertLogService = async (data: AlertLogPostProps) => {
 
 export const getAlertLogsService = async (data: AlertLogGetProps) => {
   try {
+    await getAlertLogByCustomer.validate(data);
+
     let start: Date | undefined;
     let finish: Date | undefined;
     let id = data.id;
 
-    const isCustomer = await getCustomerByUUID(id as UUID);
+    const customer = await getCustomerByUUID(id as UUID);
 
-    if (!isCustomer) {
-      throw new Error("CUSTOMER_NOT_FOUND");
-    }
+    await customerNotFound.validate({ customer });
 
     if (data.start) {
       start = parseToDateTime(data.start, 0);
@@ -52,13 +57,11 @@ export const getAlertLogsService = async (data: AlertLogGetProps) => {
       finish = endOfDay(new Date());
     }
 
-    const result = await getAlertLogsByCustomer(id as UUID, start, finish);
+    const alerts = await getAlertLogsByCustomer(id as UUID, start, finish);
 
-    if (!result) {
-      throw new Error("ALERT_LOGS_NOT_FOUND");
-    }
+    await alertsNotFound.validate({ alerts });
 
-    return result;
+    return alerts;
   } catch (error: unknown) {
     throw error;
   }

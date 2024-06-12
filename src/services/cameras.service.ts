@@ -6,22 +6,32 @@ import {
   toggleCamera,
 } from "../repositories/cameras.repository";
 import { UUID } from "crypto";
-import { CameraPostProps, GetCamerasByCustomerIdProps } from "../validations/cameras.validation";
+import {
+  CameraPostProps,
+  GetCamerasByCustomerIdProps,
+  cameraNotFound,
+  getCamerasByCustomerIdValidation,
+  isUniqueIpValidation,
+  patchCameraStatusValidation,
+  postCameraValidation,
+} from "../validations/cameras.validation";
 import { getCustomerByUUID } from "../repositories/customers.repository";
+import { customerNotFound } from "../validations/customer.validation";
 
 export const postCameraService = async (data: CameraPostProps) => {
   try {
-    const isIpUnique = await checkUniqueCameraIp(data.ip, data.customerId as UUID);
-
-    if (!isIpUnique) {
-        throw new Error('CAMERA_IP_ALREADY_EXISTS_WITH_CUSTOMER');
-    }
+    await postCameraValidation.validate(data);
 
     const customer = await getCustomerByUUID(data.customerId as UUID);
 
-    if (!customer) {
-      throw new Error("CUSTOMER_NOT_FOUND");
-    }
+    await customerNotFound.validate({ customer });
+
+    const isIpUnique = await checkUniqueCameraIp(
+      data.ip,
+      data.customerId as UUID
+    );
+
+    await isUniqueIpValidation.validate(isIpUnique);
 
     const result = await createCamera(data);
 
@@ -33,13 +43,13 @@ export const postCameraService = async (data: CameraPostProps) => {
 
 export const patchCameraIsEnabledService = async (id: UUID) => {
   try {
+    await patchCameraStatusValidation.validate(id);
+
     const camera = await getCameraByUUID(id);
 
-    if (!camera) {
-      throw new Error("CAMERA_NOT_FOUND");
-    }
+    await cameraNotFound.validate({ camera });
 
-    const newState = !camera.isEnabled;
+    const newState = !camera?.isEnabled;
 
     const result = await toggleCamera(id, newState);
 
@@ -49,13 +59,15 @@ export const patchCameraIsEnabledService = async (id: UUID) => {
   }
 };
 
-export const getCamerasByCustomerIdService = async (data: GetCamerasByCustomerIdProps) => {
+export const getCamerasByCustomerIdService = async (
+  data: GetCamerasByCustomerIdProps
+) => {
   try {
+    await getCamerasByCustomerIdValidation.validate(data);
+
     const customer = await getCustomerByUUID(data.id as UUID);
 
-    if (!customer) {
-      throw new Error("CUSTOMER_NOT_FOUND");
-    }
+    await customerNotFound.validate({ customer });
 
     const result = await getCamerasByCustomerId(data);
 
