@@ -24,9 +24,20 @@ export const postCameraValidation = yup.object().shape({
     .required("customerId é obrigatório"),
 });
 
+export const patchCameraStatusValidation = yup
+  .string()
+  .uuid("id deve ser um UUID válido")
+  .typeError("id deve ser uma string")
+  .required("id é obrigatório");
+
 export const cameraNotFound = yup.object().shape({
   camera: yup.object().required("UUID da câmera não encontrado ou inválido"),
 });
+
+export const isUniqueIpValidation = yup
+  .boolean()
+  .notOneOf([false], "IP já cadastrado para este cliente")
+  .required("IP já cadastrado para este cliente");
 
 export const getCamerasByCustomerIdValidation = yup.object().shape({
   id: yup
@@ -42,4 +53,6 @@ export const getCamerasByCustomerIdValidation = yup.object().shape({
 });
 
 export type CameraPostProps = yup.InferType<typeof postCameraValidation>;
-export type GetCamerasByCustomerIdProps = yup.InferType<typeof getCamerasByCustomerIdValidation>;
+export type GetCamerasByCustomerIdProps = yup.InferType<
+  typeof getCamerasByCustomerIdValidation
+>;
