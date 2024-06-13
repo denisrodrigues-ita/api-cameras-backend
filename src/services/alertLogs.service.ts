@@ -14,7 +14,7 @@ import {
 } from "../repositories/alertLogs.repository";
 import { parseToDateTime } from "../utils/parseToDateTime";
 import { getCustomerByUUID } from "../repositories/customers.repository";
-import { customerNotFound } from "../validations/customer.validation";
+import { customerNotFound } from "../validations/commom.validation";
 import { cameraNotFound } from "../validations/cameras.validation";
 
 export const postAlertLogService = async (data: AlertLogPostProps) => {

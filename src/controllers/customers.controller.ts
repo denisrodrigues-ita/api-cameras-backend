@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { postCustumerService } from "../services/customers.service";
-import { CustomerPostProps } from "../validations/customer.validation";
+import { CustomerPostProps } from "../validations/commom.validation";
 import { fold } from 'fp-ts/Either';
 
 export const postCustomersController = async (req: Request, res: Response) => {

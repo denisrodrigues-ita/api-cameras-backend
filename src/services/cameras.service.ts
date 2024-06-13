@@ -16,7 +16,7 @@ import {
   postCameraValidation,
 } from "../validations/cameras.validation";
 import { getCustomerByUUID } from "../repositories/customers.repository";
-import { customerNotFound } from "../validations/customer.validation";
+import { customerNotFound } from "../validations/commom.validation";
 
 export const postCameraService = async (data: CameraPostProps) => {
   try {

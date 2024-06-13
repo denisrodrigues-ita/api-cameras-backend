@@ -1,22 +1,27 @@
 import { getCustomerByName } from "../repositories/customers.repository";
-import { AuthCustomerNameProps, authCustomerNameValidation } from "../validations/auth.validation";
+import { AuthCustomerNameProps } from "../validations/auth.validation";
 import { generateToken } from "../middlewares/auth.middleware";
-import { customerNotFound } from "../validations/customer.validation";
+import { hasNameValidation } from "../validations/commom.validation";
+import { Either, left, right } from "fp-ts/lib/Either";
 
-export const postAuthService = async (data: AuthCustomerNameProps) => {
+export const postAuthService = async (data: AuthCustomerNameProps): Promise<Either<Error, string | null>> => {
   try {
-    await authCustomerNameValidation.validate(data);
+    const hasName = await hasNameValidation.isValid(data);
+
+    if (!hasName) return left(new Error("Nome é obrigatório"));
     
     const name = data.name;
 
     const customer = await getCustomerByName(name);
 
-    await customerNotFound.validate({customer});
+    if (!customer) return left(new Error("Usuário não encontrado"));
 
-    const result = await generateToken(name);
+    const result = generateToken(name);
 
-    return result;
-  } catch (error: unknown) {
-    throw error;
+    if (!result) return left(new Error("Ocorreu um erro ao tentar gerar o token"));
+
+    return right(result);
+  } catch (error) {
+    return left(new Error("Ocorreu um erro ao tentar logar o usuário"));
   }
 };

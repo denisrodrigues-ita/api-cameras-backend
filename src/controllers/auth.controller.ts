@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { postAuthService } from "../services/auth.service";
-import * as yup from "yup";
+import { fold } from 'fp-ts/Either';
 
 export const postAuthController = async (req: Request, res: Response) => {
   try {
@@ -8,15 +8,12 @@ export const postAuthController = async (req: Request, res: Response) => {
 
     const token = await postAuthService(data);
 
-    res.status(201).send({ message: "Usuário logado com sucesso", token });
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (token) => res.status(201).send({ message: "Usuário logado com sucesso", token })
+    )(token);
+
   } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(400).send({
-        message:
-          "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    res.status(500).send({ message: "Ocorreu um erro ao tentar logar o usuário" });
   }
 };
