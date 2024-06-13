@@ -35,7 +35,7 @@ export const patchCameraIsEnabledController = async (
   res: Response
 ) => {
   try {
-    const id = req.params.id;
+    const id = req.body.id;
 
     const result = await patchCameraIsEnabledService(id as UUID);
 

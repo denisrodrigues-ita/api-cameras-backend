@@ -9,7 +9,7 @@ import { authenticateToken } from "../middlewares/auth.middleware";
 
 const camerasRouter = (app: Express) => {
   app.post("/cameras", authenticateToken, postCameraController);
-  app.patch("/cameras/:id", authenticateToken, patchCameraIsEnabledController);
+  app.patch("/cameras", authenticateToken, patchCameraIsEnabledController);
   app.get("/cameras/bycustomer/:customerId", authenticateToken, getCamerasByCustomerIdController);
   app.get("/cameras", authenticateToken, getCamerasController);
 };
