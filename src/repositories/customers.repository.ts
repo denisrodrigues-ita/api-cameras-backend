@@ -1,16 +1,18 @@
 import { prisma } from "../../prisma/client";
 import { UUID } from "crypto";
 import { CustomerPostProps } from "../validations/customer.validation";
+import { Prisma } from "@prisma/client";
+import { Either, right, left } from "fp-ts/lib/Either";
 
-export const createCustomer = async (data: CustomerPostProps) => {
+export const createCustomer = async (data: CustomerPostProps): Promise<Either<Error, Prisma.CustomerCreateInput>>  => {
   try {
     const result = await prisma.customer.create({
       data,
     });
 
-    return result;
-  } catch (error: unknown) {
-    throw error;
+    return right(result);
+  } catch (error) {
+    return left(error as Error);
   } finally {
     prisma.$disconnect();
   }

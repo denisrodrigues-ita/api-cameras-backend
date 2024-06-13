@@ -1,14 +1,13 @@
 import * as yup from "yup";
 
-export const postCustomerValidation = yup.object().shape({
+export const hasNameValidation = yup.object().shape({
   name: yup
     .string()
-    .typeError("Nome deve conter apenas letras")
-    .required("Nome é obrigatório"),
+    .required(),
 });
 
 export const customerNotFound = yup.object().shape({
   customer: yup.object().required("Cliente não encontrado"),
 });
 
-export type CustomerPostProps = yup.InferType<typeof postCustomerValidation>;
+export type CustomerPostProps = yup.InferType<typeof hasNameValidation>;

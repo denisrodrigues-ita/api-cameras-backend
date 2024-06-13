@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { postCustumerService } from "../services/customers.service";
 import { CustomerPostProps } from "../validations/customer.validation";
-import * as yup from "yup";
+import { fold } from 'fp-ts/Either';
 
 export const postCustomersController = async (req: Request, res: Response) => {
   try {
@@ -9,23 +9,12 @@ export const postCustomersController = async (req: Request, res: Response) => {
 
     const result = await postCustumerService(data);
 
-    res.status(201).send({ message: "Cliente cadastrado", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
-  }
-};
-
-export const getCustomersController = async (req: Request, res: Response) => {
-  try {
-    res.status(200).send({ message: "GET customers" });
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result) => res.status(201).send({ message: "Cliente cadastrado com sucesso", result })
+    )(result);
+    
   } catch (error) {
-    res.status(400);
+    res.status(500).send({ message: "Ocorreu um erro ao tentar cadastrar o cliente" });
   }
 };
