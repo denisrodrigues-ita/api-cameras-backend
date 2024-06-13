@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
 import { postCustumerService } from "../services/customers.service";
-import {
-  CustomerPostProps,
-  postCustomerValidation,
-} from "../validations/customer.validation";
+import { CustomerPostProps } from "../validations/customer.validation";
 import * as yup from "yup";
 
 export const postCustomersController = async (req: Request, res: Response) => {
   try {
     const data: CustomerPostProps = req.body;
-
-    await postCustomerValidation.validate(data);
 
     const result = await postCustumerService(data);
 
