@@ -2,14 +2,14 @@ import { getCustomerByName } from "../repositories/customers.repository";
 import { AuthCustomerNameProps } from "../validations/auth.validation";
 import { generateToken } from "../middlewares/auth.middleware";
 import { hasNameValidation } from "../validations/commom.validation";
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, left, right, fold } from "fp-ts/lib/Either";
 
-export const postAuthService = async (data: AuthCustomerNameProps): Promise<Either<Error, string | null>> => {
+export const postAuthService = async (data: AuthCustomerNameProps): Promise<Either<Error, string>> => {
   try {
     const hasName = await hasNameValidation.isValid(data);
 
     if (!hasName) return left(new Error("Nome é obrigatório"));
-    
+
     const name = data.name;
 
     const customer = await getCustomerByName(name);
@@ -18,9 +18,10 @@ export const postAuthService = async (data: AuthCustomerNameProps): Promise<Eith
 
     const result = generateToken(name);
 
-    if (!result) return left(new Error("Ocorreu um erro ao tentar gerar o token"));
-
-    return right(result);
+    return fold(
+      (error: Error) => left(error),
+      (token: string) => right(token)
+    )(result);
   } catch (error) {
     return left(new Error("Ocorreu um erro ao tentar logar o usuário"));
   }

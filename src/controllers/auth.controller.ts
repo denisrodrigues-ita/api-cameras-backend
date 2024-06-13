@@ -10,7 +10,7 @@ export const postAuthController = async (req: Request, res: Response) => {
 
     fold(
       (error: Error) => res.status(400).send({ message: error.message }),
-      (token) => res.status(201).send({ message: "Usuário logado com sucesso", token })
+      (token) => res.status(200).send({ message: "Usuário logado com sucesso", token })
     )(token);
 
   } catch (error: unknown) {
