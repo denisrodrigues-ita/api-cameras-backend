@@ -4,15 +4,15 @@ import { CustomerPostProps } from "../validations/commom.validation";
 import { Prisma } from "@prisma/client";
 import { Either, left, right } from "fp-ts/lib/Either";
 
-export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.CustomerCreateInput | null>  => {
+export const createCustomer = async (data: CustomerPostProps): Promise<Either<Error, Prisma.CustomerCreateInput>>  => {
   try {
     const result = await prisma.customer.create({
       data,
     });
 
-    return result;
+    return right(result);
   } catch (error) {
-    return null;
+    return left(new Error("Ocorreu um erro no banco de dados ao tentar criar o cliente"));
   } finally {
     prisma.$disconnect();
   }

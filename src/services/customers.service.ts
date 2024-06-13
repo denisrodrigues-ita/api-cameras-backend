@@ -1,4 +1,4 @@
-import { Either, left, right } from "fp-ts/lib/Either";
+import { Either, fold, left, right } from "fp-ts/lib/Either";
 import { createCustomer } from "../repositories/customers.repository";
 import {CustomerPostProps, hasNameValidation} from "../validations/commom.validation";
 import { Prisma } from "@prisma/client";
@@ -11,9 +11,15 @@ export const postCustumerService = async (data: CustomerPostProps): Promise<Eith
 
     const result = await createCustomer(data);
 
-    if (!result) return left(new Error("Ocorreu um erro ao tentar criar o cliente"));
+    return fold(
+      (error: Error) => left(error),
+      (result: Prisma.CustomerCreateInput) => {
+        if (!result) return left(new Error("Ocorreu um erro ao tentar criar o cliente"));
 
-    return right(result);
+        return right(result);
+      }
+    )(result);
+
   } catch (error) {
     return left(new Error("Ocorreu um erro ao tentar criar o cliente"));
   }
