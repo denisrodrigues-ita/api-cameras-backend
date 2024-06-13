@@ -2,7 +2,6 @@ import { prisma } from "../../prisma/client";
 import { UUID } from "crypto";
 import { CustomerPostProps } from "../validations/customer.validation";
 import { Prisma } from "@prisma/client";
-import { Either, right, left } from "fp-ts/lib/Either";
 
 export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.CustomerCreateInput | undefined>  => {
   try {
@@ -12,7 +11,7 @@ export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.Cu
 
     return result;
   } catch (error) {
-    return (error as Error);
+    return undefined;
   } finally {
     prisma.$disconnect();
   }

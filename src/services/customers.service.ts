@@ -7,7 +7,7 @@ export const postCustumerService = async (data: CustomerPostProps): Promise<Eith
   try {
     const hasName = await hasNameValidation.isValid(data);
 
-    if (!hasName) return left(new Error("Nome é um campo obrigatório"));
+    if (!hasName) return left(new Error("Nome é obrigatório"));
 
     const result = await createCustomer(data);
 
