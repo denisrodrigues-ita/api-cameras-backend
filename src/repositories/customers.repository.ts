@@ -2,17 +2,16 @@ import { prisma } from "../../prisma/client";
 import { UUID } from "crypto";
 import { CustomerPostProps } from "../validations/commom.validation";
 import { Prisma } from "@prisma/client";
-import { Either, left, right } from "fp-ts/lib/Either";
 
-export const createCustomer = async (data: CustomerPostProps): Promise<Either<Error, Prisma.CustomerCreateInput>>  => {
+export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.CustomerCreateInput>  => {
   try {
     const result = await prisma.customer.create({
       data,
     });
 
-    return right(result);
+    return result;
   } catch (error) {
-    return left(new Error("Ocorreu um erro no banco de dados ao tentar criar o cliente"));
+    throw error;
   } finally {
     prisma.$disconnect();
   }
@@ -44,7 +43,7 @@ export const getCustomerByName = async (name: string): Promise<Prisma.CustomerCr
 
     return result;
   } catch (error) {
-    return null;
+    throw error;
   } finally {
     prisma.$disconnect();
   }

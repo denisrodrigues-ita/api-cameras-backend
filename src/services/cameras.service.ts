@@ -9,9 +9,7 @@ import { UUID } from "crypto";
 import {
   CameraPostProps,
   GetCamerasByCustomerIdProps,
-  cameraNotFound,
   getCamerasByCustomerIdValidation,
-  patchCameraStatusValidation,
 } from "../validations/cameras.validation";
 import { getCustomerByUUID } from "../repositories/customers.repository";
 import {
@@ -26,6 +24,8 @@ import { Prisma } from "@prisma/client";
 export const postCameraService = async (data: CameraPostProps): Promise<Either<Error, Prisma.CameraCreateInput>> => {
   try {
     if (!data.name) return left(new Error("Nome é obrigatório"));
+
+    if (typeof data.name != "string") return left(new Error("Nome deve conter apenas letras"));
 
     if (!data.ip) return left(new Error("IP é obrigatório"));
 
@@ -72,21 +72,25 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
   }
 };
 
-export const patchCameraIsEnabledService = async (id: UUID) => {
+export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Error, Prisma.CameraUpdateInput>> => {
   try {
-    await patchCameraStatusValidation.validate(id);
+    const isUUID = await isUUIDvalidation.isValid({uuid: id});
+
+    if (!isUUID) return left(new Error("ID inválido"));
 
     const camera = await getCameraByUUID(id);
 
-    await cameraNotFound.validate({ camera });
+    if(!camera) return left(new Error("Câmera não encontrada"));
 
-    const newState = !camera?.isEnabled;
+    const newState = !camera.isEnabled;
 
     const result = await toggleCamera(id, newState);
 
-    return result;
+    if (!result) return left(new Error("Erro ao alterar o status da câmera"));
+
+    return right(result);
   } catch (error: unknown) {
-    throw error;
+    return left(new Error("Erro ao alterar o status da câmera"));
   }
 };
 

@@ -1,8 +1,5 @@
 import { Request, Response } from "express";
-import {
-  CameraPostProps,
-  GetCamerasByCustomerIdProps,
-} from "../validations/cameras.validation";
+import {GetCamerasByCustomerIdProps} from "../validations/cameras.validation";
 import {
   getCamerasByCustomerIdService,
   patchCameraIsEnabledService,
@@ -38,23 +35,15 @@ export const patchCameraIsEnabledController = async (
 
     const result = await patchCameraIsEnabledService(id as UUID);
 
-    res.status(200).send({
-      message: `${
-        result.isEnabled
-          ? "Câmera ativada com sucesso"
-          : "Câmera desativada com sucesso"
-      }`,
-      result,
-    });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Erro: Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result) =>
+        res.status(200).send({ message: "Status da câmera alterado com sucesso", result })
+    
+    )(result)
+    
+  } catch (error) {
+    res.status(500).send({ message: "Ocorreu um erro ao tentar alterar o status da câmera" });
   }
 };
 
