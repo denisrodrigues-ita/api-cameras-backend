@@ -27,4 +27,12 @@ export const isUUIDvalidation = yup.object().shape({
   uuid: yup.string().uuid().required(),
 });
 
+export const statusValidation = yup.object().shape({
+  status: yup
+  .string()
+  .oneOf(["true", "false"], "state deve ser 'true' ou 'false'")
+  .typeError("state deve ser uma string")
+  .optional(),
+});
+
 export type CustomerPostProps = yup.InferType<typeof hasNameValidation>;

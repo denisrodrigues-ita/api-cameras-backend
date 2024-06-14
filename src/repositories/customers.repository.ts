@@ -17,14 +17,14 @@ export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.Cu
   }
 };
 
-export const getCustomerByUUID = async (id: UUID) => {
+export const getCustomerByUUID = async (id: UUID): Promise<Prisma.CustomerCreateInput | null> => {
   try {
     const result = await prisma.customer.findUnique({
       where: { id },
     });
 
     return result;
-  } catch (error: unknown) {
+  } catch (error) {
     throw error;
   } finally {
     prisma.$disconnect();

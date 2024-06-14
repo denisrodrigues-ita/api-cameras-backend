@@ -37,7 +37,7 @@ export const getCameraByUUID = async (id: UUID): Promise<Prisma.CameraCreateInpu
 
 export const getCamerasByCustomerId = async (
   data: GetCamerasByCustomerIdProps
-) => {
+): Promise<Prisma.CameraCreateManyInput> => {
   try {
     const result = await prisma.camera.findMany({
       where: {
@@ -48,8 +48,8 @@ export const getCamerasByCustomerId = async (
       },
     });
 
-    return result;
-  } catch (error: unknown) {
+    return result as unknown as Prisma.CameraCreateManyInput;
+  } catch (error) {
     throw error;
   } finally {
     prisma.$disconnect();

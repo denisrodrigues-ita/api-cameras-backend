@@ -9,14 +9,13 @@ import { UUID } from "crypto";
 import {
   CameraPostProps,
   GetCamerasByCustomerIdProps,
-  getCamerasByCustomerIdValidation,
 } from "../validations/cameras.validation";
 import { getCustomerByUUID } from "../repositories/customers.repository";
 import {
-  customerNotFoundValidation,
   ipValidation,
   isEnabledValidation,
   isUUIDvalidation,
+  statusValidation,
 } from "../validations/commom.validation";
 import { Either, left, right, fold } from "fp-ts/lib/Either";
 import { Prisma } from "@prisma/client";
@@ -74,6 +73,8 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
 
 export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Error, Prisma.CameraUpdateInput>> => {
   try {
+    if (!id) return left(new Error("ID é obrigatório"));
+
     const isUUID = await isUUIDvalidation.isValid({uuid: id});
 
     if (!isUUID) return left(new Error("ID inválido"));
@@ -94,20 +95,26 @@ export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Erro
   }
 };
 
-export const getCamerasByCustomerIdService = async (
-  data: GetCamerasByCustomerIdProps
-) => {
+export const getCamerasByCustomerIdService = async (data: GetCamerasByCustomerIdProps): Promise<Either<Error, Prisma.CameraCreateManyInput>> => {
   try {
-    await getCamerasByCustomerIdValidation.validate(data);
+    if (!data.id) return left(new Error("ID do cliente é obrigatório"));
+
+    const isUUID = await isUUIDvalidation.isValid({uuid: data.id});
+
+    if (!isUUID) return left(new Error("UUID inválido"));
+
+    const isStatusValid = await statusValidation.isValid(data);
+
+    if (!isStatusValid) return left(new Error("Status inválido"));
 
     const customer = await getCustomerByUUID(data.id as UUID);
 
-    await customerNotFoundValidation.validate({ customer });
+    if (!customer) return left(new Error("Cliente não encontrado"));
 
     const result = await getCamerasByCustomerId(data);
 
-    return result;
+    return right(result);
   } catch (error: unknown) {
-    throw error;
+    return left(new Error("Erro ao buscar as câmeras"));
   }
 };
