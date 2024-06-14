@@ -14,7 +14,7 @@ import { getCustomerByUUID } from "../repositories/customers.repository";
 import {
   ipValidation,
   isEnabledValidation,
-  isUUIDvalidation,
+  UUIDvalidation,
   statusValidation,
 } from "../validations/commom.validation";
 import { Either, left, right, fold } from "fp-ts/lib/Either";
@@ -36,7 +36,7 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
 
     if (!isIpValid) return left(new Error("Formato invalido de IP, apenas IPv4 e IPv6 são aceitos"));
 
-    const isUUID = await isUUIDvalidation.isValid({uuid: data.customerId});
+    const isUUID = await UUIDvalidation.isValid({uuid: data.customerId});
 
     if (!isUUID) return left(new Error("ID inválido"));
 
@@ -75,7 +75,7 @@ export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Erro
   try {
     if (!id) return left(new Error("ID é obrigatório"));
 
-    const isUUID = await isUUIDvalidation.isValid({uuid: id});
+    const isUUID = await UUIDvalidation.isValid({uuid: id});
 
     if (!isUUID) return left(new Error("ID inválido"));
 
@@ -99,7 +99,7 @@ export const getCamerasByCustomerIdService = async (data: GetCamerasByCustomerId
   try {
     if (!data.id) return left(new Error("ID do cliente é obrigatório"));
 
-    const isUUID = await isUUIDvalidation.isValid({uuid: data.id});
+    const isUUID = await UUIDvalidation.isValid({uuid: data.id});
 
     if (!isUUID) return left(new Error("UUID inválido"));
 

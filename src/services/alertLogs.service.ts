@@ -5,7 +5,6 @@ import {
   AlertLogGetProps,
   AlertLogPostProps,
   alertsNotFound,
-  createAlertLogValidation,
   getAlertLogByCustomer,
 } from "../validations/alertLogs.validation";
 import {
@@ -14,22 +13,29 @@ import {
 } from "../repositories/alertLogs.repository";
 import { parseToDateTime } from "../utils/parseToDateTime";
 import { getCustomerByUUID } from "../repositories/customers.repository";
-import { customerNotFoundValidation } from "../validations/commom.validation";
-import { cameraNotFound } from "../validations/cameras.validation";
+import { Prisma } from "@prisma/client";
+import { right, left, Either } from 'fp-ts/Either';
+import { UUIDvalidation } from "../validations/commom.validation";
 
-export const postAlertLogService = async (data: AlertLogPostProps) => {
+export const postAlertLogService = async (data: AlertLogPostProps): Promise<Either<Error, Prisma.AlertLogCreateInput>> => {
   try {
-    await createAlertLogValidation.validate(data);
+    if (!data.cameraId) return left(new Error("O campo cameraId é obrigatório"));
+
+    const isUUIDValid = await UUIDvalidation.isValid({ uuid: data.cameraId });
+
+    if (!isUUIDValid) return left(new Error("ID inválido"));
 
     const camera = await getCameraByUUID(data.cameraId as UUID);
 
-    await cameraNotFound.validate({ camera });
+    if (!camera) return left(new Error("Câmera não encontrada"));
 
     const result = await createAlertLog(data);
 
-    return result;
-  } catch (error: unknown) {
-    throw error;
+    if (!result) return left(new Error("Erro ao tentar registrar o alerta"));
+
+    return right(result);
+  } catch (error) {
+    return left(new Error("Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"));
   }
 };
 
@@ -43,7 +49,7 @@ export const getAlertLogsService = async (data: AlertLogGetProps) => {
 
     const customer = await getCustomerByUUID(id as UUID);
 
-    await customerNotFoundValidation.validate({ customer });
+    if (!customer) return left(new Error("Cliente não encontrado"));
 
     if (data.start) {
       start = parseToDateTime(data.start, 0);

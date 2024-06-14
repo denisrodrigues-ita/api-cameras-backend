@@ -4,10 +4,6 @@ export const hasNameValidation = yup.object().shape({
   name: yup.string().required(),
 });
 
-export const customerNotFoundValidation = yup.object().shape({
-  customer: yup.object().required(),
-});
-
 export const ipValidation = yup.object().shape({
   ip: yup
     .string()
@@ -23,7 +19,7 @@ export const isEnabledValidation = yup.object().shape({
     .required(),
 });
 
-export const isUUIDvalidation = yup.object().shape({
+export const UUIDvalidation = yup.object().shape({
   uuid: yup.string().uuid().required(),
 });
 
