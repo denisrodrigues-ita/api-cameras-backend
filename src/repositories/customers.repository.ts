@@ -1,9 +1,9 @@
 import { prisma } from "../../prisma/client";
 import { UUID } from "crypto";
-import { CustomerPostProps } from "../validations/commom.validation";
+import { NameProps } from "../interfaces";
 import { Prisma } from "@prisma/client";
 
-export const createCustomer = async (data: CustomerPostProps): Promise<Prisma.CustomerCreateInput>  => {
+export const createCustomer = async (data: NameProps): Promise<Prisma.CustomerCreateInput>  => {
   try {
     const result = await prisma.customer.create({
       data,

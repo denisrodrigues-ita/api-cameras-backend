@@ -74,4 +74,4 @@ const isValidDateTimeFormat = (value: string): boolean => {
   return true;
 };
 
-export type CustomerPostProps = yup.InferType<typeof hasNameValidation>;
+export type NameProps = yup.InferType<typeof hasNameValidation>;

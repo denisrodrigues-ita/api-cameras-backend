@@ -6,17 +6,14 @@ import {
   toggleCamera,
 } from "../repositories/cameras.repository";
 import { UUID } from "crypto";
-import {
-  CameraPostProps,
-  GetCamerasByCustomerIdProps,
-} from "../validations/cameras.validation";
+import { CameraPostProps, CamerasByCustomerIdProps } from "../interfaces";
 import { getCustomerByUUID } from "../repositories/customers.repository";
 import {
   ipValidation,
   isEnabledValidation,
   UUIDvalidation,
   statusValidation,
-} from "../validations/commom.validation";
+} from "../validations";
 import { Either, left, right, fold } from "fp-ts/lib/Either";
 import { Prisma } from "@prisma/client";
 
@@ -24,25 +21,32 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
   try {
     if (!data.name) return left(new Error("Nome é obrigatório"));
 
-    if (typeof data.name != "string") return left(new Error("Nome deve conter apenas letras"));
+    if (typeof data.name != "string")
+      return left(new Error("Nome deve conter apenas letras"));
 
     if (!data.ip) return left(new Error("IP é obrigatório"));
 
     if (!data.customerId) return left(new Error("ID do cliente é obrigatório"));
 
-    if (!data.isEnabled) return left(new Error("Status da câmera é obrigatório"));
+    if (!data.isEnabled)
+      return left(new Error("Status da câmera é obrigatório"));
 
     const isIpValid = await ipValidation.isValid(data);
 
-    if (!isIpValid) return left(new Error("Formato invalido de IP, apenas IPv4 e IPv6 são aceitos"));
+    if (!isIpValid)
+      return left(
+        new Error("Formato invalido de IP, apenas IPv4 e IPv6 são aceitos")
+      );
 
-    const isUUID = await UUIDvalidation.isValid({uuid: data.customerId});
+    const isUUID = await UUIDvalidation.isValid({ uuid: data.customerId });
 
     if (!isUUID) return left(new Error("ID inválido"));
 
     const isEnabled = await isEnabledValidation.isValid(data);
 
     if (!isEnabled) return left(new Error("Status da câmera é inválido"));
+
+    data.isEnabled ? (data.isEnabled = true) : (data.isEnabled = false);
 
     const customer = await getCustomerByUUID(data.customerId as UUID);
 
@@ -53,7 +57,8 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
       data.customerId as UUID
     );
 
-    if (!isIpUnique) return left(new Error("IP já cadastrado para esse cliente"));
+    if (!isIpUnique)
+      return left(new Error("IP já cadastrado para esse cliente"));
 
     const result = await createCamera(data);
 
@@ -71,21 +76,23 @@ export const postCameraService = async (data: CameraPostProps): Promise<Either<E
   }
 };
 
-export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Error, Prisma.CameraUpdateInput>> => {
+export const patchCameraIsEnabledService = async (
+  cameraId: UUID
+): Promise<Either<Error, Prisma.CameraUpdateInput>> => {
   try {
-    if (!id) return left(new Error("ID é obrigatório"));
+    if (!cameraId) return left(new Error("ID é obrigatório"));
 
-    const isUUID = await UUIDvalidation.isValid({uuid: id});
+    const isUUID = await UUIDvalidation.isValid({ uuid: cameraId });
 
     if (!isUUID) return left(new Error("ID inválido"));
 
-    const camera = await getCameraByUUID(id);
+    const camera = await getCameraByUUID(cameraId);
 
-    if(!camera) return left(new Error("Câmera não encontrada"));
+    if (!camera) return left(new Error("Câmera não encontrada"));
 
     const newState = !camera.isEnabled;
 
-    const result = await toggleCamera(id, newState);
+    const result = await toggleCamera(cameraId, newState);
 
     if (!result) return left(new Error("Erro ao alterar o status da câmera"));
 
@@ -95,11 +102,13 @@ export const patchCameraIsEnabledService = async (id: UUID): Promise<Either<Erro
   }
 };
 
-export const getCamerasByCustomerIdService = async (data: GetCamerasByCustomerIdProps): Promise<Either<Error, Prisma.CameraCreateManyInput>> => {
+export const getCamerasByCustomerIdService = async (
+  data: CamerasByCustomerIdProps
+): Promise<Either<Error, Prisma.CameraCreateManyInput>> => {
   try {
     if (!data.id) return left(new Error("ID do cliente é obrigatório"));
 
-    const isUUID = await UUIDvalidation.isValid({uuid: data.id});
+    const isUUID = await UUIDvalidation.isValid({ uuid: data.id });
 
     if (!isUUID) return left(new Error("UUID inválido"));
 

@@ -1,9 +1,9 @@
 import { getCustomerByName } from "../repositories/customers.repository";
-import { AuthCustomerNameProps } from "../validations/auth.validation";
+import { NameProps } from "../interfaces";
 import { generateToken } from "../middlewares/auth.middleware";
 import { Either, left, right } from "fp-ts/lib/Either";
 
-export const postAuthService = async (data: AuthCustomerNameProps): Promise<Either<Error, string>> => {
+export const postAuthService = async (data: NameProps): Promise<Either<Error, string>> => {
   try {
     if (!data.name) return left(new Error("Nome é obrigatório"));
 

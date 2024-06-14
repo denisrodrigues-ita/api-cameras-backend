@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { postCustumerService } from "../services/customers.service";
-import { CustomerPostProps } from "../validations/commom.validation";
+import { NameProps } from "../validations";
 import { fold } from 'fp-ts/Either';
 
 export const postCustomersController = async (req: Request, res: Response) => {
   try {
-    const data: CustomerPostProps = req.body;
+    const data: NameProps = req.body;
 
     const result = await postCustumerService(data);
 

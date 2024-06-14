@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { AlertLogPostProps } from "../validations/alertLogs.validation";
 import {
   getAlertLogsService,
   postAlertLogService,
@@ -10,7 +9,7 @@ export const postAlertLogController = async (req: Request, res: Response) => {
   try {
     const data = req.body;
 
-    const result = await postAlertLogService(data as AlertLogPostProps);
+    const result = await postAlertLogService(data);
 
     fold(
       (error: Error) => res.status(400).send({message: error.message}),

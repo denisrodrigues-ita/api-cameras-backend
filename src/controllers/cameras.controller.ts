@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import {GetCamerasByCustomerIdProps} from "../validations/cameras.validation";
+import {CamerasByCustomerIdProps} from "../interfaces";
 import {
   getCamerasByCustomerIdService,
   patchCameraIsEnabledService,
   postCameraService,
 } from "../services/cameras.service";
-import * as yup from "yup";
 import { UUID } from "crypto";
 import { fold } from 'fp-ts/Either';
 import { Prisma } from "@prisma/client";
@@ -32,9 +31,9 @@ export const patchCameraIsEnabledController = async (
   res: Response
 ) => {
   try {
-    const id = req.body.id;
+    const cameraId = req.body.cameraId;
 
-    const result = await patchCameraIsEnabledService(id as UUID);
+    const result = await patchCameraIsEnabledService(cameraId as UUID);
 
     fold(
       (error: Error) => res.status(400).send({ message: error.message }),
@@ -59,7 +58,7 @@ export const getCamerasByCustomerIdController = async (
     };
 
     const result = await getCamerasByCustomerIdService(
-      data as GetCamerasByCustomerIdProps
+      data as CamerasByCustomerIdProps
     );
 
     fold(

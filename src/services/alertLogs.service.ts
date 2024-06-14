@@ -1,10 +1,7 @@
 import { getCameraByUUID } from "../repositories/cameras.repository";
 import { startOfDay, endOfDay } from "date-fns";
 import { UUID } from "crypto";
-import {
-  AlertLogGetProps,
-  AlertLogPostProps,
-} from "../validations/alertLogs.validation";
+import { AlertLogGetProps, AlertLogPostProps } from "../interfaces";
 import {
   createAlertLog,
   getAlertLogsByCustomer,
@@ -17,9 +14,11 @@ import {
   UUIDvalidation,
   finishDateValidation,
   startDateValidation,
-} from "../validations/commom.validation";
+} from "../validations";
 
-export const postAlertLogService = async (data: AlertLogPostProps): Promise<Either<Error, Prisma.AlertLogCreateInput>> => {
+export const postAlertLogService = async (
+  data: AlertLogPostProps
+): Promise<Either<Error, Prisma.AlertLogCreateInput>> => {
   try {
     if (!data.cameraId)
       return left(new Error("O campo cameraId é obrigatório"));
@@ -46,7 +45,9 @@ export const postAlertLogService = async (data: AlertLogPostProps): Promise<Eith
   }
 };
 
-export const getAlertLogsService = async (data: AlertLogGetProps): Promise<Either<Error, Prisma.AlertLogCreateInput[]>> => {
+export const getAlertLogsService = async (
+  data: AlertLogGetProps
+): Promise<Either<Error, Prisma.AlertLogCreateInput[]>> => {
   try {
     let start: Date | undefined;
     let finish: Date | undefined;
@@ -91,7 +92,10 @@ export const getAlertLogsService = async (data: AlertLogGetProps): Promise<Eithe
 
     const alerts = await getAlertLogsByCustomer(data.id as UUID, start, finish);
 
-    if (alerts.length === 0) return left(new Error("Alertas não encontrados, tente outro período de tempo"));
+    if (alerts.length === 0)
+      return left(
+        new Error("Alertas não encontrados, tente outro período de tempo")
+      );
 
     if (!alerts) return left(new Error("Alertas não encontrados"));
 

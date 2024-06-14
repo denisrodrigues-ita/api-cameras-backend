@@ -1,13 +1,12 @@
 import { prisma } from "../../prisma/client";
 import { UUID } from "crypto";
-import {
-  CameraPostProps,
-  GetCamerasByCustomerIdProps,
-} from "../validations/cameras.validation";
+import { CameraPostProps, CamerasByCustomerIdProps } from "../interfaces";
 import { Either, left, right } from "fp-ts/lib/Either";
 import { Prisma } from "@prisma/client";
 
-export const createCamera = async (data: CameraPostProps): Promise<Either<Error, Prisma.CameraCreateInput>> => {
+export const createCamera = async (
+  data: CameraPostProps
+): Promise<Either<Error, Prisma.CameraCreateInput>> => {
   try {
     const result = await prisma.camera.create({
       data,
@@ -21,13 +20,15 @@ export const createCamera = async (data: CameraPostProps): Promise<Either<Error,
   }
 };
 
-export const getCameraByUUID = async (id: UUID): Promise<Prisma.CameraCreateInput | null> => {
+export const getCameraByUUID = async (
+  id: UUID
+): Promise<Prisma.CameraCreateInput | null> => {
   try {
     const result = await prisma.camera.findUnique({
       where: { id },
     });
 
-    return result as unknown as Prisma.CameraCreateInput || null;
+    return (result as unknown as Prisma.CameraCreateInput) || null;
   } catch (error) {
     throw error;
   } finally {
@@ -36,7 +37,7 @@ export const getCameraByUUID = async (id: UUID): Promise<Prisma.CameraCreateInpu
 };
 
 export const getCamerasByCustomerId = async (
-  data: GetCamerasByCustomerIdProps
+  data: CamerasByCustomerIdProps
 ): Promise<Prisma.CameraCreateManyInput> => {
   try {
     const result = await prisma.camera.findMany({
@@ -56,7 +57,10 @@ export const getCamerasByCustomerId = async (
   }
 };
 
-export const toggleCamera = async (id: UUID, newState: boolean): Promise<Prisma.CameraUpdateInput> => {
+export const toggleCamera = async (
+  id: UUID,
+  newState: boolean
+): Promise<Prisma.CameraUpdateInput> => {
   try {
     const result = await prisma.camera.update({
       where: { id },
@@ -73,7 +77,10 @@ export const toggleCamera = async (id: UUID, newState: boolean): Promise<Prisma.
   }
 };
 
-export const checkUniqueCameraIp = async (ip: string, customerId: UUID): Promise<boolean> => {
+export const checkUniqueCameraIp = async (
+  ip: string,
+  customerId: UUID
+): Promise<boolean> => {
   try {
     const result = await prisma.camera.findFirst({
       where: {

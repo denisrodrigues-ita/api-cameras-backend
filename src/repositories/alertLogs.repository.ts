@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import { prisma } from "../../prisma/client";
-import { AlertLogPostProps } from "../validations/alertLogs.validation";
+import { AlertLogPostProps } from "../interfaces";
 import { Prisma } from "@prisma/client";
 
 export const createAlertLog = async (data: AlertLogPostProps): Promise<Prisma.AlertLogCreateInput> => {

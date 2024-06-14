@@ -1,9 +1,9 @@
 import { Either, left, right } from "fp-ts/lib/Either";
 import { createCustomer } from "../repositories/customers.repository";
-import {CustomerPostProps} from "../validations/commom.validation";
+import {NameProps} from "../validations";
 import { Prisma } from "@prisma/client";
 
-export const postCustumerService = async (data: CustomerPostProps): Promise<Either<Error, Prisma.CustomerCreateInput>> => {
+export const postCustumerService = async (data: NameProps): Promise<Either<Error, Prisma.CustomerCreateInput>> => {
   try {
     if (!data.name) return left(new Error("Nome é obrigatório"));
 
