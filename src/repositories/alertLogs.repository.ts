@@ -17,11 +17,7 @@ export const createAlertLog = async (data: AlertLogPostProps): Promise<Prisma.Al
   }
 };
 
-export const getAlertLogsByCustomer = async (
-  id: UUID,
-  start?: Date,
-  finish?: Date
-) => {
+export const getAlertLogsByCustomer = async (id: UUID, start?: Date, finish?: Date): Promise<Prisma.AlertLogCreateInput[]> => {
   try {
     const filter: any = {
       camera: {
@@ -41,7 +37,7 @@ export const getAlertLogsByCustomer = async (
       where: filter,
     });
 
-    return result;
+    return result as unknown as Prisma.AlertLogCreateInput[];
   } catch (error: unknown) {
     throw error;
   } finally {

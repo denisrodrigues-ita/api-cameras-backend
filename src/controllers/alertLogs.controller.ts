@@ -32,7 +32,11 @@ export const getAlertLogsByCustomerController = async (req: Request, res: Respon
 
     const result = await getAlertLogsService(data);
 
-    res.status(200).send({ message: "Alertas listados com sucesso", result });
+    fold(
+      (error: Error) => res.status(400).send({message: error.message}),
+      (result) => res.status(200).send({ message: "Alertas encontrados com sucesso", result })
+    )(result);
+    
   } catch (error) {
     res.status(500).send({message: "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"});
   }
