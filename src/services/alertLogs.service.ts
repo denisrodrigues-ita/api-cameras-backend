@@ -15,33 +15,29 @@ import {
   finishDateValidation,
   startDateValidation,
 } from "../validations";
+import { langErrors } from "../lang/errors";
 
 export const postAlertLogService = async (
   data: AlertLogPostProps
 ): Promise<Either<Error, Prisma.AlertLogCreateInput>> => {
   try {
-    if (!data.cameraId)
-      return left(new Error("O campo cameraId é obrigatório"));
+    if (!data.cameraId) return left(new Error(langErrors.CAMERAID_REQUIRED));
 
     const isUUIDValid = await UUIDvalidation.isValid({ uuid: data.cameraId });
 
-    if (!isUUIDValid) return left(new Error("ID inválido"));
+    if (!isUUIDValid) return left(new Error(langErrors.UUID_INVALID));
 
     const camera = await getCameraByUUID(data.cameraId as UUID);
 
-    if (!camera) return left(new Error("Câmera não encontrada"));
+    if (!camera) return left(new Error(langErrors.CAMERA_NOT_FOUND));
 
     const result = await createAlertLog(data);
 
-    if (!result) return left(new Error("Erro ao tentar registrar o alerta"));
+    if (!result) return left(new Error(langErrors.ALERT_LOG_NOT_CREATED));
 
     return right(result);
   } catch (error) {
-    return left(
-      new Error(
-        "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"
-      )
-    );
+    return left(new Error(langErrors.GENERAL_ERROR));
   }
 };
 
@@ -52,11 +48,11 @@ export const getAlertLogsService = async (
     let start: Date | undefined;
     let finish: Date | undefined;
 
-    if (!data.id) return left(new Error("O campo id é obrigatório"));
+    if (!data.id) return left(new Error(langErrors.ID_REQUIRED));
 
     const isUUIDValid = await UUIDvalidation.isValid({ uuid: data.id });
 
-    if (!isUUIDValid) return left(new Error("ID inválido"));
+    if (!isUUIDValid) return left(new Error(langErrors.UUID_INVALID));
 
     if (data.start) {
       const isStartValid = await startDateValidation.isValid({
@@ -64,7 +60,7 @@ export const getAlertLogsService = async (
       });
 
       if (!isStartValid)
-        return left(new Error("Formato inválido para start. Use YYYYMMDDHHmm"));
+        return left(new Error(`${langErrors.DATE_INVALID} para start`));
 
       start = parseToDateTime(data.start, 0);
     } else {
@@ -77,9 +73,7 @@ export const getAlertLogsService = async (
       });
 
       if (!isFinishValid)
-        return left(
-          new Error("Formato inválido para finish. Use YYYYMMDDHHmm")
-        );
+        return left(new Error(`${langErrors.DATE_INVALID} para finish`));
 
       finish = parseToDateTime(data.finish, 59);
     } else {
@@ -88,23 +82,16 @@ export const getAlertLogsService = async (
 
     const customer = await getCustomerByUUID(data.id as UUID);
 
-    if (!customer) return left(new Error("Cliente não encontrado"));
+    if (!customer) return left(new Error(langErrors.CUSTOMER_NOT_FOUND));
 
     const alerts = await getAlertLogsByCustomer(data.id as UUID, start, finish);
 
-    if (alerts.length === 0)
-      return left(
-        new Error("Alertas não encontrados, tente outro período de tempo")
-      );
+    if (alerts.length === 0) return left(new Error(langErrors.ALERT_NOT_FOUND));
 
-    if (!alerts) return left(new Error("Alertas não encontrados"));
+    if (!alerts) return left(new Error(langErrors.ALERT_ERROR_NOT_FOUND));
 
     return right(alerts);
   } catch (error) {
-    return left(
-      new Error(
-        "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"
-      )
-    );
+    return left(new Error(langErrors.GENERAL_ERROR));
   }
 };
