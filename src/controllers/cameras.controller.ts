@@ -10,23 +10,22 @@ import {
 } from "../services/cameras.service";
 import * as yup from "yup";
 import { UUID } from "crypto";
+import { fold } from 'fp-ts/Either';
 
 export const postCameraController = async (req: Request, res: Response) => {
   try {
     const data = req.body;
 
-    const result = await postCameraService(data as CameraPostProps);
+    const result = await postCameraService(data);
 
-    res.status(201).send({ message: "Câmera cadastrada", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Erro: Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result) =>
+        res.status(201).send({ message: "Câmera criada com sucesso", result })
+    )(result);
+
+  } catch (error) {
+    res.status(500).send({ message: "Ocorreu um erro ao tentar criar uma câmera" });
   }
 };
 

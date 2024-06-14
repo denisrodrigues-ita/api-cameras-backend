@@ -4,16 +4,18 @@ import {
   CameraPostProps,
   GetCamerasByCustomerIdProps,
 } from "../validations/cameras.validation";
+import { Either, left, right } from "fp-ts/lib/Either";
+import { Prisma } from "@prisma/client";
 
-export const createCamera = async (data: CameraPostProps) => {
+export const createCamera = async (data: CameraPostProps): Promise<Either<Error, Prisma.CameraCreateInput>> => {
   try {
     const result = await prisma.camera.create({
       data,
     });
 
-    return result;
-  } catch (error: unknown) {
-    throw error;
+    return right(result as unknown as Prisma.CameraCreateInput);
+  } catch (error) {
+    return left(new Error("Erro ao criar a câmera no banco de dados"));
   } finally {
     prisma.$disconnect();
   }

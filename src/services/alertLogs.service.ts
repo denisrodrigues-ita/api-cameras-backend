@@ -14,7 +14,7 @@ import {
 } from "../repositories/alertLogs.repository";
 import { parseToDateTime } from "../utils/parseToDateTime";
 import { getCustomerByUUID } from "../repositories/customers.repository";
-import { customerNotFound } from "../validations/commom.validation";
+import { customerNotFoundValidation } from "../validations/commom.validation";
 import { cameraNotFound } from "../validations/cameras.validation";
 
 export const postAlertLogService = async (data: AlertLogPostProps) => {
@@ -43,7 +43,7 @@ export const getAlertLogsService = async (data: AlertLogGetProps) => {
 
     const customer = await getCustomerByUUID(id as UUID);
 
-    await customerNotFound.validate({ customer });
+    await customerNotFoundValidation.validate({ customer });
 
     if (data.start) {
       start = parseToDateTime(data.start, 0);

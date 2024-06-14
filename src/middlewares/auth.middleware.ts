@@ -2,15 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { Either, left, right } from "fp-ts/lib/Either";
 import jwt from "jsonwebtoken";
 
-export const generateToken = (name: string): Either<Error, string> => {
+export const generateToken = (name: string): Either<Error, string | null> => {
   try {
     const token = jwt.sign({ name }, process.env.JWT_SECRET as string, {
       expiresIn: "12h",
     });
 
-    if (!token) return left(new Error("Ocorreu um erro ao tentar gerar o token"));
-
-    return right(token);
+    return right(token || null);
   } catch (error) {
     return left(new Error("Ocorreu um erro ao tentar gerar o token"));
   }

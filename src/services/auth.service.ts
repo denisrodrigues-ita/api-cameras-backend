@@ -20,8 +20,13 @@ export const postAuthService = async (data: AuthCustomerNameProps): Promise<Eith
 
     return fold(
       (error: Error) => left(error),
-      (token: string) => right(token)
+      (token: string | null) =>{
+        if (!token) return left(new Error("Ocorreu um erro ao tentar logar o usuário"));
+        
+        return right(token)
+      } 
     )(result);
+
   } catch (error) {
     return left(new Error("Ocorreu um erro ao tentar logar o usuário"));
   }
