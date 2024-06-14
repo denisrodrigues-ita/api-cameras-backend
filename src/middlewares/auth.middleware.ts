@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-export const generateToken = (name: string) => {
+export const generateToken = (name: string): string | null => {
   try {
     const token = jwt.sign({ name }, process.env.JWT_SECRET as string, {
       expiresIn: "12h",
     });
-    return token;
+
+    return token || null;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 

@@ -1,27 +1,23 @@
 import { Request, Response } from "express";
-import { AlertLogPostProps } from "../validations/alertLogs.validation";
 import {
   getAlertLogsService,
   postAlertLogService,
 } from "../services/alertLogs.service";
-import * as yup from "yup";
+import { fold } from 'fp-ts/Either';
 
 export const postAlertLogController = async (req: Request, res: Response) => {
   try {
     const data = req.body;
 
-    const result = await postAlertLogService(data as AlertLogPostProps);
+    const result = await postAlertLogService(data);
 
-    res.status(201).send({ message: "Alerta registado com sucesso", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({message: error.message}),
+      (result) => res.status(201).send({ message: "Alerta registrado com sucesso", result })
+    )(result);
+
+  } catch (error) {
+    res.status(500).send({message: "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"});
   }
 };
 
@@ -35,15 +31,12 @@ export const getAlertLogsByCustomerController = async (req: Request, res: Respon
 
     const result = await getAlertLogsService(data);
 
-    res.status(200).send({ message: "Alertas listados com sucesso", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({message: error.message}),
+      (result) => res.status(200).send({ message: "Alertas encontrados com sucesso", result })
+    )(result);
+    
+  } catch (error) {
+    res.status(500).send({message: "Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde"});
   }
 };

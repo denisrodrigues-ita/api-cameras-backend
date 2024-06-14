@@ -1,32 +1,28 @@
 import { Request, Response } from "express";
-import {
-  CameraPostProps,
-  GetCamerasByCustomerIdProps,
-} from "../validations/cameras.validation";
+import {CamerasByCustomerIdProps} from "../interfaces";
 import {
   getCamerasByCustomerIdService,
   patchCameraIsEnabledService,
   postCameraService,
 } from "../services/cameras.service";
-import * as yup from "yup";
 import { UUID } from "crypto";
+import { fold } from 'fp-ts/Either';
+import { Prisma } from "@prisma/client";
 
 export const postCameraController = async (req: Request, res: Response) => {
   try {
     const data = req.body;
 
-    const result = await postCameraService(data as CameraPostProps);
+    const result = await postCameraService(data);
 
-    res.status(201).send({ message: "Câmera cadastrada", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Erro: Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result) =>
+        res.status(201).send({ message: "Câmera criada com sucesso", result })
+    )(result);
+
+  } catch (error) {
+    res.status(500).send({ message: "Ocorreu um erro ao tentar criar uma câmera" });
   }
 };
 
@@ -35,27 +31,19 @@ export const patchCameraIsEnabledController = async (
   res: Response
 ) => {
   try {
-    const id = req.body.id;
+    const cameraId = req.body.cameraId;
 
-    const result = await patchCameraIsEnabledService(id as UUID);
+    const result = await patchCameraIsEnabledService(cameraId as UUID);
 
-    res.status(200).send({
-      message: `${
-        result.isEnabled
-          ? "Câmera ativada com sucesso"
-          : "Câmera desativada com sucesso"
-      }`,
-      result,
-    });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(500).send({
-        message:
-          "Erro: Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result: Prisma.CameraUpdateInput) =>
+        res.status(200).send({ message: `Câmera ${result.isEnabled ? "ativada" : "desativada"} com sucesso`, result })
+    
+    )(result)
+
+  } catch (error) {
+    res.status(500).send({ message: "Ocorreu um erro ao tentar alterar o status da câmera" });
   }
 };
 
@@ -70,28 +58,16 @@ export const getCamerasByCustomerIdController = async (
     };
 
     const result = await getCamerasByCustomerIdService(
-      data as GetCamerasByCustomerIdProps
+      data as CamerasByCustomerIdProps
     );
 
-    res
-      .status(200)
-      .send({ message: "Câmeras encontradas com sucesso", result });
-  } catch (error: unknown) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).send({ message: error.message });
-    } else {
-      res.status(400).send({
-        message:
-          "Erro: Ocorreu um erro ao tentar lidar com os dados, tente novamente mais tarde",
-      });
-    }
-  }
-};
+    fold(
+      (error: Error) => res.status(400).send({ message: error.message }),
+      (result) =>
+        res.status(200).send({ message: "Câmeras encontradas com sucesso", result })
+    )(result);
 
-export const getCamerasController = (req: Request, res: Response) => {
-  try {
-    res.status(200).send({ message: "GET cameras" });
-  } catch (error) {
-    res.status(400);
+  } catch (error: unknown) {
+    res.status(500).send({ message: "Ocorreu um erro ao tentar buscar as câmeras" });
   }
 };
